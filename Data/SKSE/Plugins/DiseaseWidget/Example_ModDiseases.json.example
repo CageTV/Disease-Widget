@@ -1,0 +1,33 @@
+{
+  "_readme": [
+    "EXAMPLE for mod authors. Rename this file to e.g. MyMod_Diseases.json (any name ending in .json) and keep it in Data/SKSE/Plugins/DiseaseWidget/ (subfolders are fine).",
+    "An id that already exists (see Diseases.json) is MERGED: your 'match' names and 'forms' are added to it, so your spells show the existing icon.",
+    "A new id creates a new disease. Put your icon in Data/Interface/DiseaseWidget/Icons/<icon>.svg (or .png), white artwork on transparent.",
+    "forms are 'Plugin.esp|0xLocalFormID'. Fields you leave out keep their value (name, icon, color, requireDiseaseType)."
+  ],
+  "diseases": [
+    {
+      "id": "ataxia",
+      "match": [
+        "Mild Ataxia",
+        "Severe Ataxia"
+      ],
+      "forms": [
+        "MyDiseaseMod.esp|0x000801"
+      ]
+    },
+    {
+      "id": "mymod_swamp_fever",
+      "name": "Swamp Fever",
+      "icon": "swamp_fever",
+      "match": [
+        "Swamp Fever"
+      ],
+      "forms": [
+        "MyDiseaseMod.esp|0x000802"
+      ],
+      "requireDiseaseType": false,
+      "color": "#8FB36A"
+    }
+  ]
+}
