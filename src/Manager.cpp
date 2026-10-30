@@ -86,7 +86,7 @@ namespace {
             // VisitActiveEffects works on every runtime. GetActiveEffectList() returns nullptr on VR in an all-runtime
             // build, which would hide every disease there. The walk is not locked, so the callback only copies plain
             // data (names, ids, icons) out of the effect and never keeps the pointer.
-            target->VisitActiveEffects([&](RE::ActiveEffect* effect) {
+            auto visit = [&](RE::ActiveEffect* effect) {
                 if (!effect || !effect->spell) {
                     return RE::BSContainer::ForEachResult::kContinue;
                 }
@@ -121,7 +121,18 @@ namespace {
                 entry.firstSeen = it->second;
                 found.push_back(std::move(entry));
                 return RE::BSContainer::ForEachResult::kContinue;
-            });
+            };
+#ifdef ENABLE_SKYRIM_VR
+            target->VisitActiveEffects(visit);
+#else
+            // This build has no VR runtime (Skyrim SE / AE 1.6.1170 and newer, including 1.7.x): the native list is the way, and
+            // VisitActiveEffects only exists in an all-runtime build of CommonLibSSE-NG.
+            if (auto* effects = target->GetActiveEffectList()) {
+                for (auto* effect : *effects) {
+                    visit(effect);
+                }
+            }
+#endif
         }
         std::erase_if(g_firstSeen, [&](const auto& kv) { return !seen.contains(kv.first); });
         g_firstScan = false;

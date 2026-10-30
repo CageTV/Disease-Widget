@@ -18,6 +18,9 @@ namespace {
     std::unordered_map<std::string, ImGuiMCP::ImTextureID> g_textures;  // render thread only
     std::atomic<bool> g_invalidate{false};
     double g_lastPreview = -100.0;
+    bool g_unlocked = false;  // the config page lets the mouse move the widget
+    bool g_dragging = false;
+    bool g_moved = false;
 
     struct Entry {
         std::string label;
@@ -72,7 +75,7 @@ namespace {
         return entries;
     }
 
-    void Draw(const Settings::Config& cfg, const std::vector<Entry>& entries, double now) {
+    void Draw(const Settings::Config& cfg, const std::vector<Entry>& entries, double now, bool previewing) {
         using namespace ImGuiMCP;
         const ImVec2 display = GetIO()->DisplaySize;
         const float uiScale = display.y / 1080.0f;
@@ -140,6 +143,33 @@ namespace {
         if (minY < 0.0f) shiftY = -minY; else if (maxY > display.y) shiftY = display.y - maxY;
         const float ringThick = std::max(1.0f, 1.6f * uiScale);
 
+        // Moving it with the mouse (config page open, unlocked): click the widget and drag. The anchor moves by the mouse's move.
+        if (previewing && g_unlocked && !entries.empty()) {
+            auto* io = GetIO();
+            const ImVec2 mouse = io->MousePos;
+            const float pad = 8.0f * uiScale;
+            const float bx0 = minX + shiftX - pad, by0 = minY + shiftY - pad, bx1 = maxX + shiftX + pad, by1 = maxY + shiftY + pad;
+            const bool inside = mouse.x >= bx0 && mouse.x <= bx1 && mouse.y >= by0 && mouse.y <= by1;
+            if (!g_dragging && IsMouseClicked(0) && !io->WantCaptureMouse && inside) {
+                g_dragging = true;
+            }
+            if (g_dragging) {
+                if (IsMouseDown(0)) {
+                    auto& live = Settings::Get();
+                    live.posX = std::clamp(live.posX + io->MouseDelta.x / display.x, 0.0f, 1.0f);
+                    live.posY = std::clamp(live.posY + io->MouseDelta.y / display.y, 0.0f, 1.0f);
+                    g_moved = true;
+                } else {
+                    g_dragging = false;
+                }
+            }
+            const bool active = g_dragging || inside;
+            ImDrawListManager::AddRect(drawList, ImVec2{bx0, by0}, ImVec2{bx1, by1},
+                                       active ? IM_COL32(255, 220, 110, 242) : IM_COL32(255, 255, 255, 115), 3.0f, 0, 1.5f);
+        } else {
+            g_dragging = false;
+        }
+
         for (std::size_t i = 0; i < entries.size(); ++i) {
             const auto& e = entries[i];
             const auto& m = metrics[i];
@@ -195,6 +225,7 @@ namespace {
         const double now = Utils::NowSeconds();
         const bool previewing = (now - g_lastPreview) < 0.35;
         if (!previewing) {
+            g_unlocked = false;  // the config page is closed: the widget locks itself again
             if (SKSEMenuFramework::IsAnyBlockingWindowOpened()) return;
             if (cfg.hideInMenus && Manager::IsMenuOpen()) return;
             if (cfg.hideInDialogue && Manager::IsDialogueOpen()) return;
@@ -202,7 +233,7 @@ namespace {
         }
         const auto entries = BuildEntries(cfg, previewing, now);
         if (!entries.empty()) {
-            Draw(cfg, entries, now);
+            Draw(cfg, entries, now, previewing);
         }
     }
 }
@@ -217,6 +248,14 @@ void Hud::Register() {
 }
 
 void Hud::MarkPreview() { g_lastPreview = Utils::NowSeconds(); }
+
+bool& Hud::Unlocked() { return g_unlocked; }
+
+bool Hud::TakeMoved() {
+    const bool moved = g_moved;
+    g_moved = false;
+    return moved;
+}
 
 void Hud::InvalidateIcons() { g_invalidate = true; }
 

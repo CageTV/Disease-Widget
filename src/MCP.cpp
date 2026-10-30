@@ -53,6 +53,8 @@ namespace {
         SeparatorText("Position & layout");
         ch |= SliderFloat("Horizontal position", &c.posX, 0.0f, 1.0f, "%.3f");
         ch |= SliderFloat("Vertical position", &c.posY, 0.0f, 1.0f, "%.3f");
+        if (Button(Hud::Unlocked() ? "Lock the widget" : "Unlock to move with the mouse")) { Hud::Unlocked() = !Hud::Unlocked(); }
+        Tip("Unlocked: click the widget on the screen (while this menu is open) and drag it where you want it. It locks again when the menu closes.");
         if (Button("Top left")) { Place(c, 0.02f, 0.08f, Settings::kGrowRight); ch = true; }
         SameLine();
         if (Button("Top right")) { Place(c, 0.98f, 0.08f, Settings::kGrowLeft); ch = true; }
@@ -91,6 +93,7 @@ namespace {
         if (Button("Reset to defaults")) { Settings::ResetConfig(); ch = true; }
         TextDisabled("Settings are saved automatically when this menu closes.");
         g_dirty |= ch;
+        if (Hud::TakeMoved()) g_dirty = true;  // moved with the mouse
     }
 
     void __stdcall RenderDiseases() {
