@@ -1,3 +1,11 @@
+# Disease Widget (SKSE) - movable
+
+**This is [kuroishitam's Disease Widget - SKSE](https://www.nexusmods.com/skyrimspecialedition/mods/195393) v1.1 with one addition:** the widget can be moved with the mouse. Open the *Disease Widget* page in SKSE Menu Framework, press **Unlock to move with the mouse**, then click the widget on the screen and drag it where you want it. It locks again when the menu closes, and the position is saved with the other settings. Everything else is the author's v1.1, unchanged.
+
+The DLL in the releases is built for Skyrim SE / AE 1.6.1170 and newer, including 1.7.104 (no VR). The author's own file on Nexus covers every runtime; use it unless you want the drag. The source builds for all runtimes with the author's CMake setup (the active-effect walk uses `VisitActiveEffects` when built with VR support). See `NOTICE.txt`.
+
+---
+
 # Disease Widget (SKSE)
 
 Shows an on-screen icon (and optional name) for every disease active on the player. Configured in-game through
