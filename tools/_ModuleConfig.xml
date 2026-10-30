@@ -1,0 +1,32 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+  <moduleName>Disease Widget - SKSE</moduleName>
+  <requiredInstallFiles>
+    <folder source="common" destination=""/>
+    <file source="README.txt" destination="Disease Widget README.txt"/>
+    <file source="NOTICE.txt" destination="Disease Widget NOTICE.txt"/>
+  </requiredInstallFiles>
+  <installSteps order="Explicit">
+    <installStep name="Game version">
+      <optionalFileGroups order="Explicit">
+        <group name="DiseaseWidget.dll" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="New (Skyrim 1.6.1170 and newer, including 1.7.x)">
+              <description>Works on Skyrim SE/AE 1.6.x and on every later version, including 1.7.x. Pre-selected when the installer sees 1.6.1170 or newer.</description>
+              <files><folder source="new" destination=""/></files>
+              <typeDescriptor><dependencyType><defaultType name="Optional"/><patterns>
+                <pattern><dependencies><gameDependency version="1.6.1170.0"/></dependencies><type name="Recommended"/></pattern>
+              </patterns></dependencyType></typeDescriptor>
+            </plugin>
+            <plugin name="Older (Skyrim VR and 1.6.1130 and older)">
+              <description>For Skyrim VR and Skyrim SE/AE 1.6.1130 and older. On 1.6.1170 either build works.</description>
+              <files><folder source="older" destination=""/></files>
+              <typeDescriptor><dependencyType><defaultType name="Optional"/><patterns>
+                <pattern><dependencies><gameDependency version="1.6.1170.0"/></dependencies><type name="Optional"/></pattern>
+              </patterns></dependencyType></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+      </optionalFileGroups>
+    </installStep>
+  </installSteps>
+</config>

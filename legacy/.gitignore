@@ -1,0 +1,3 @@
+build/
+build-log.txt
+build-local/vcpkg_installed/

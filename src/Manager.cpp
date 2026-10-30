@@ -122,17 +122,18 @@ namespace {
                 found.push_back(std::move(entry));
                 return RE::BSContainer::ForEachResult::kContinue;
             };
-#ifdef ENABLE_SKYRIM_VR
-            target->VisitActiveEffects(visit);
-#else
-            // This build has no VR runtime (Skyrim SE / AE 1.6.1170 and newer, including 1.7.x): the native list is the way, and
-            // VisitActiveEffects only exists in an all-runtime build of CommonLibSSE-NG.
-            if (auto* effects = target->GetActiveEffectList()) {
-                for (auto* effect : *effects) {
-                    visit(effect);
+            // VisitActiveEffects only exists in an all-runtime build of CommonLibSSE-NG (where GetActiveEffectList() is a VR shim); builds without
+            // it (Skyrim SE / AE 1.6.1170 and newer) walk the native list instead. A generic lambda lets the compiler pick whichever exists.
+            auto walk = [&](auto* magicTarget) {
+                if constexpr (requires { magicTarget->VisitActiveEffects(visit); }) {
+                    magicTarget->VisitActiveEffects(visit);
+                } else if (auto* effects = magicTarget->GetActiveEffectList()) {
+                    for (auto* effect : *effects) {
+                        visit(effect);
+                    }
                 }
-            }
-#endif
+            };
+            walk(target);
         }
         std::erase_if(g_firstSeen, [&](const auto& kv) { return !seen.contains(kv.first); });
         g_firstScan = false;
